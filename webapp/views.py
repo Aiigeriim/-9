@@ -2,11 +2,10 @@ from django.db import models
 from django.views.generic import (
     ListView, DetailView, CreateView, UpdateView, DeleteView
 )
-from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.urls import reverse_lazy
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin, PermissionRequiredMixin
+from django.urls import reverse_lazy, reverse
 from .forms import PhotoForm
-from .models import Picture
-
+from .models import Picture, Album
 
 
 #
@@ -74,25 +73,74 @@ class PhotoCreateView(CreateView):
     #     return kwargs
 #
 #
-# class PhotoUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
-#     model = Picture
-#     form_class = PhotoForm
-#     template_name = "photos/photo_form.html"
+class PhotoUpdateView(PermissionRequiredMixin, UpdateView):
+    model = Picture
+    form_class = PhotoForm
+    template_name = "photos/photo_update.html"
+    permission_required = 'webapp.change_post'
+
+
+    def has_permission(self):
+        return super().has_permission() or self.request.user == self.get_object().author
+
+    def get_success_url(self):
+        return reverse_lazy("webapp:photo_view", kwargs={"pk": self.object.pk})
+
+
+
+
+    # model = Picture
+    # form_class = PhotoForm
+    # template_name = "photos/photo_form.html"
+    #
+    # def test_func(self):
+    #     return self.get_object().author == self.request.user
+    #
+    # def get_form_kwargs(self):
+    #     kwargs = super().get_form_kwargs()
+    #     kwargs["user"] = self.request.user
+    #     return kwargs
 #
-#     def test_func(self):
-#         return self.get_object().author == self.request.user
 #
-#     def get_form_kwargs(self):
-#         kwargs = super().get_form_kwargs()
-#         kwargs["user"] = self.request.user
-#         return kwargs
-#
-#
-# class PhotoDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
-#     model = Picture
-#     template_name = "photos/photo_confirm_delete.html"
-#     success_url = reverse_lazy("photo_list")
-#
-#     def test_func(self):
-#         return self.get_object().author == self.request.user
+class PhotoDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+
+        model = Picture
+        template_name = "photos/photo_delete.html"
+        context_object_name = "photo"
+
+        # permission_required = 'webapp.delete_picture'
+
+        def test_func(self):
+            obj = self.get_object()
+            return self.request.user.has_perm('webapp.delete_picture') or obj.author == self.request.user
+
+        def has_permission(self):
+            return self.request.user.has_perm('webapp.delete_picture') or self.request.user == self.get_object().author
+
+        def get_success_url(self):
+            return reverse("accounts:profile", kwargs={"pk": self.request.user.pk})
+
+
+
+
+    # model = Picture
+    # template_name = "photos/photo_confirm_delete.html"
+    # success_url = reverse_lazy("photo_list")
+    #
+    # def test_func(self):
+    #     return self.get_object().author == self.request.user
+
+
+
+class AlbumListView(ListView):
+    model = Album
+    template_name = "albums/album_list.html"
+
+
+    context_object_name = "albums"
+    paginate_by = 5
+    ordering = ("-created_at",)
+
+    def get_queryset(self):
+        return super().get_queryset()
 

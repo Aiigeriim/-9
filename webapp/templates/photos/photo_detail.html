@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block link %}
+    {% if request.user == photo.author or perms.webapp.change_picture %}
+        <li class="nav-item">
+            <a href="{% url "webapp:photo_update" photo.pk %}" class="nav-link">Редактирование</a>
+        </li>
+    {% endif %}
+    {% if request.user == photo.author or perms.webapp.delete_post %}
+        <li class="nav-item">
+        {% url "webapp:photo_delete" photo.pk %}
+            <a href="{% url "webapp:photo_delete" photo.pk %}" class="nav-link">Удаление</a>
+        </li>
+    {% endif %}
+
+{% endblock %}
+
+{% block content %}
+    {% include "partial/photo_view_partial.html" %}
+{% endblock %}
+
+
+
+
+
+{#{% extends 'base.html' %}#}
+{##}
+{#{% block link %}#}
+{#<li class="nav-item">#}
+{#                    <a class="nav-link" href="{% url "webapp:photo_update" photo.pk %}">Редактировать</a>#}
+{#                </li>#}
+{#{% endblock %}#}
+{##}
+{#<div class="post bg-white border rounded col-12 col-md-6 mb-4">#}
+{#    <div class="post-header py-3 px-4 d-flex align-items-center">#}
+{#        <img class="post-avatar rounded-circle me-3" src="{{ photo.author.avatar.url }}" alt="User Avatar">#}
+{#        <span class="post-username font-weight-bold"><a href="{% url 'accounts:profile' photo.author.pk %}">#}
+{#                        {{ photo.author.username }}</a>#}
+{#                    </span>#}
+{#    </div>#}
+{#    <img class="post-image img-fluid" src="{{ photo.image.url }}" alt="Post Image">#}
+{#    <div class="post-actions py-2 px-4">#}
+{##}
+{#    {% if request.user.is_authenticated %}#}
+{#          <a href="{% url 'webapp:post_like' post.id %}"#}
+{#             data-like="like_post"#}
+{#             data-article-id="{{ post.id }}">#}
+{#             {% if user in post.like_users.all %}#}
+{#                 Unlike#}
+{#             {% else %}#}
+{#                 Like#}
+{#             {% endif %}#}
+{#          </a>#}
+{#          <span id="likes-count-{{ post.id }}">{{ post.like_users.count }}</span>#}
+{#      {% endif %}#}
+{##}
+{##}
+{#users_groups#}
+{#    </div>#}
+{#    <div class="post-description px-4 py-3">#}
+{#        <p>{{ photo.caption }}</p>#}
+{#        <p>{{ photo.author.username }}</p>#}
+{##}
+{#    </div>#}
+{#    <div class="post-timestamp px-4 py-2 text-muted">{{ photo.created_at }}#}
+{#    <p>{{ photo.caption }}</p>#}
+{#        <p>{{ photo.author.username }}</p>#}
+{##}
+{#    </div>#}
+{##}
+{#</div>#}
