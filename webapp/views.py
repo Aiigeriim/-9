@@ -1,11 +1,18 @@
+from django.contrib.admin import action
+from django.contrib.auth.decorators import login_required
 from django.db import models
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
+from django.views import View
 from django.views.generic import (
     ListView, DetailView, CreateView, UpdateView, DeleteView
 )
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin, PermissionRequiredMixin
 from django.urls import reverse_lazy, reverse
+
+from accounts.models import User
 from .forms import PhotoForm, AlbumForm
-from .models import Picture, Album
+from .models import Picture, Album, FavoritePicture, FavoriteAlbum
 
 
 #
@@ -198,15 +205,78 @@ class AlbumDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 #
 #
 class AlbumUpdateView(PermissionRequiredMixin, UpdateView):
-    pass
-#     model = Picture
-#     form_class = PhotoForm
-#     template_name = "albums/photo_update.html"
-#     permission_required = 'webapp.change_post'
+    model = Picture
+    form_class = PhotoForm
+    template_name = "albums/album_update.html"
+    permission_required = 'webapp.change_post'
+
+
+    def has_permission(self):
+        return super().has_permission() or self.request.user == self.get_object().author
+
+    def get_success_url(self):
+        return reverse_lazy("webapp:photo_view", kwargs={"pk": self.object.pk})
 #
 #
-#     def has_permission(self):
-#         return super().has_permission() or self.request.user == self.get_object().author
 #
-#     def get_success_url(self):
-#         return reverse_lazy("webapp:photo_view", kwargs={"pk": self.object.pk})
+# class FavoritePicture(View):
+#     def get(self, request, *args, pk, **kwargs):
+#
+#         if not request.user.is_authenticated:
+#             return JsonResponse({"error": "Unauthorized"}, status=401)
+#         photo = get_object_or_404(Picture, pk=pk)
+#         if request.user in photo.like_users.all():
+#             post.like_users.remove(request.user)
+#             action = "unliked"
+#         else:
+#             post.like_users.add(request.user)
+#             action = "liked"
+#
+#         return JsonResponse({
+#             "likes_count": post.like_users.count(),
+#             "action": action
+#         })
+
+class FavPicView(View):
+    def get(self, request, *args, pk, **kwargs):
+        if not request.user.is_authenticated:
+            return JsonResponse({"error": "Unauthorized"}, status=401)
+
+        photo = get_object_or_404(Picture, pk=pk)
+        user = request.user
+
+        favorite, created = FavoritePicture.objects.get_or_create(user=user, photo=photo)
+
+        if not created:
+
+            favorite.delete()
+            action = "removed"
+        else:
+            action = "added"
+
+        return JsonResponse({
+            "action": action
+        })
+
+class FavPAlbView(View):
+    def get(self, request, *args, pk, **kwargs):
+        if not request.user.is_authenticated:
+            return JsonResponse({"error": "Unauthorized"}, status=401)
+
+        album = get_object_or_404(Album, pk=pk)
+        user = request.user
+
+        favorite, created = FavoriteAlbum.objects.get_or_create(user=user, album=album)
+
+        if not created:
+
+            favorite.delete()
+            action = "removed"
+        else:
+            action = "added"
+
+        return JsonResponse({
+            "action": action
+        })
+
+

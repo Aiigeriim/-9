@@ -12,18 +12,17 @@
 
     <div class="post-actions py-2 px-4">
 
-{#    {% if request.user.is_authenticated %}#}
-{#          <a href="{% url 'webapp:post_like' post.id %}"#}
-{#             data-like="like_post"#}
-{#             data-article-id="{{ post.id }}">#}
-{#             {% if user in post.like_users.all %}#}
-{#                 Unlike#}
-{#             {% else %}#}
-{#                 Like#}
-{#             {% endif %}#}
-{#          </a>#}
-{#          <span id="likes-count-{{ post.id }}">{{ post.like_users.count }}</span>#}
-{#      {% endif %}#}
+    {% if request.user.is_authenticated %}
+          <a href="{% url 'webapp:post_like' photo.id %}"
+             data-like="like_post"
+             data-article-id="{{ photo.id }}">
+             {% if photo in FavoritePictures.objects.all %}
+                 удалить из избранных
+             {% else %}
+                 добавить в избранное
+             {% endif %}
+          </a>
+      {% endif %}
 
 
 
