@@ -2,7 +2,8 @@ from django.http import request
 from django.urls import path
 
 from webapp.views import PhotoListView, PhotoCreateView, PhotoDetailView, PhotoUpdateView, PhotoDeleteView, \
-    AlbumListView, AlbumDetailView, AlbumUpdateView, AlbumDeleteView, AlbumCreateView, FavPicView
+    AlbumListView, AlbumDetailView, AlbumUpdateView, AlbumDeleteView, AlbumCreateView, FavPicView, PhotoTokenView, \
+    GenerateTokenView
 
 app_name = "webapp"
 
@@ -21,4 +22,7 @@ urlpatterns = [
     path('album/<int:pk>/', AlbumDetailView.as_view(), name="album_view"),
     path('album/<int:pk>/update/', AlbumUpdateView.as_view(), name="album_update"),
     path('album/<int:pk>/delete/', AlbumDeleteView.as_view(), name="album_delete"),
+    path('photo/<int:pk>/', PhotoDetailView.as_view(), name='photo_view'),
+    path('photo/<str:token>/', PhotoTokenView.as_view(), name='photo_token_view'),
+    path('photo/<int:pk>/generate-token/', GenerateTokenView.as_view(), name='generate_token'),
 ]

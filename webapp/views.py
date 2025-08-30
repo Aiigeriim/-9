@@ -1,8 +1,10 @@
+from secrets import token_urlsafe
+
 from django.contrib.admin import action
 from django.contrib.auth.decorators import login_required
 from django.db import models
 from django.http import JsonResponse
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, redirect
 from django.views import View
 from django.views.generic import (
     ListView, DetailView, CreateView, UpdateView, DeleteView
@@ -10,15 +12,11 @@ from django.views.generic import (
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin, PermissionRequiredMixin
 from django.urls import reverse_lazy, reverse
 
-from accounts.models import User
+
 from .forms import PhotoForm, AlbumForm
 from .models import Picture, Album, FavoritePicture, FavoriteAlbum
 
 
-#
-#
-#
-#
 class PhotoListView(ListView):
     model = Picture
     template_name = "photos/photo_list.html"
@@ -31,22 +29,6 @@ class PhotoListView(ListView):
     def get_queryset(self):
         return super().get_queryset()
 
-    # model = Picture
-    # template_name = "photos/photo_list.html"
-    # context_object_name = "photos"
-    # paginate_by = 5
-    # ordering = ['-created_at']
-    #
-    # def get_queryset(self):
-    #     qs = super().get_queryset()
-    #     if self.request.user.is_authenticated:
-    #         # показываем все публичные + свои приватные
-    #         return qs.filter(
-    #             models.Q(is_public=True) | models.Q(author=self.request.user)
-    #         ).select_related("author", "album")
-    #     else:
-    #         return qs.filter(is_public=True).select_related("author", "album")
-
 
 
 #
@@ -54,6 +36,15 @@ class PhotoDetailView(DetailView):
     model = Picture
     template_name = "photos/photo_detail.html"
     context_object_name = "photo"
+
+class PhotoTokenView(DetailView):
+    model = Picture
+    template_name = "photos/photo_detail.html"
+    slug_field = 'access_token'
+    slug_url_kwarg = 'token'
+
+    def get_queryset(self):
+        return Picture.objects.all()
 #
 #
 class PhotoCreateView(CreateView):
@@ -65,21 +56,6 @@ class PhotoCreateView(CreateView):
         form.instance.author = self.request.user
         return super().form_valid(form)
 
-
-    # model = Picture
-    # form_class = PhotoForm
-    # template_name = "photos/photo_create.html"
-    #
-    # def form_valid(self, form):
-    #     form.instance.author = self.request.user
-    #     return super().form_valid(form)
-    #
-    # def get_form_kwargs(self):
-    #     kwargs = super().get_form_kwargs()
-    #     kwargs["user"] = self.request.user
-    #     return kwargs
-#
-#
 class PhotoUpdateView(PermissionRequiredMixin, UpdateView):
     model = Picture
     form_class = PhotoForm
@@ -96,17 +72,7 @@ class PhotoUpdateView(PermissionRequiredMixin, UpdateView):
 
 
 
-    # model = Picture
-    # form_class = PhotoForm
-    # template_name = "photos/photo_form.html"
-    #
-    # def test_func(self):
-    #     return self.get_object().author == self.request.user
-    #
-    # def get_form_kwargs(self):
-    #     kwargs = super().get_form_kwargs()
-    #     kwargs["user"] = self.request.user
-    #     return kwargs
+
 #
 #
 class PhotoDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
@@ -130,21 +96,9 @@ class PhotoDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 
 
 
-    # model = Picture
-    # template_name = "photos/photo_confirm_delete.html"
-    # success_url = reverse_lazy("photo_list")
-    #
-    # def test_func(self):
-    #     return self.get_object().author == self.request.user
-
-
-
 class AlbumListView(ListView):
     model = Album
     template_name = "albums/album_list.html"
-    context_object_name = "albums"
-
-
     context_object_name = "albums"
     paginate_by = 5
     ordering = ("-created_at",)
@@ -158,16 +112,6 @@ class AlbumDetailView(DetailView):
     template_name = "albums/album_detail.html"
     context_object_name = "album"
 #
-#
-# class AlbumCreateView(CreateView):
-#
-#     form_class = AlbumForm
-#     template_name = "albums/album_create.html"
-#
-#     def form_valid(self, form):
-#         form.instance.author = self.request.user
-#         return super().form_valid(form)
-
 
 
 
@@ -216,26 +160,7 @@ class AlbumUpdateView(PermissionRequiredMixin, UpdateView):
 
     def get_success_url(self):
         return reverse_lazy("webapp:photo_view", kwargs={"pk": self.object.pk})
-#
-#
-#
-# class FavoritePicture(View):
-#     def get(self, request, *args, pk, **kwargs):
-#
-#         if not request.user.is_authenticated:
-#             return JsonResponse({"error": "Unauthorized"}, status=401)
-#         photo = get_object_or_404(Picture, pk=pk)
-#         if request.user in photo.like_users.all():
-#             post.like_users.remove(request.user)
-#             action = "unliked"
-#         else:
-#             post.like_users.add(request.user)
-#             action = "liked"
-#
-#         return JsonResponse({
-#             "likes_count": post.like_users.count(),
-#             "action": action
-#         })
+
 
 class FavPicView(View):
     def get(self, request, *args, pk, **kwargs):
@@ -279,4 +204,11 @@ class FavPAlbView(View):
             "action": action
         })
 
+class GenerateTokenView(View):
+    def post(self, request, pk):
+        photo = get_object_or_404(Picture, pk=pk, author=request.user)
+        if not photo.access_token:
+            photo.access_token = token_urlsafe(16)
+            photo.save()
+        return redirect(reverse("webapp:photo_view", kwargs={"pk": photo.pk}))
 

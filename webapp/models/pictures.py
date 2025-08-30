@@ -26,7 +26,7 @@ class Picture(models.Model):
         verbose_name="Альбом"
     )
     is_public = models.BooleanField(default=True, verbose_name="Публичная фотография")
-    # token = models.CharField(max_length=64, blank=True, null=True, unique=True)
+    access_token = models.CharField(max_length=64, blank=True, null=True, unique=True)
 
     def __str__(self):
         return self.caption

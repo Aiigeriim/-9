@@ -13,7 +13,7 @@
 
          {% if request.user.is_authenticated %}
           <a href="{% url 'webapp:post_like' album.id %}"
-             data-like="like_post"
+             data-fav="album"
              data-article-id="{{ album.id }}">
              {% if photo in FavoriteAlbum.objects.all %}
                  удалить из избранных

@@ -38,7 +38,7 @@ async function onClick(event) {
 
 
 function onLoad(){
-    let links = document.querySelectorAll('[data-like="like"]');
+    let links = document.querySelectorAll('[data-fav="album"]');
     for (let link of links){
         link.addEventListener('click', onClick);
     }
@@ -46,4 +46,3 @@ function onLoad(){
 }
 
 window.addEventListener("load", onLoad);}
-

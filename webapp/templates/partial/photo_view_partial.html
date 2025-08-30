@@ -14,7 +14,7 @@
 
     {% if request.user.is_authenticated %}
           <a href="{% url 'webapp:post_like' photo.id %}"
-             data-like="like_post"
+             data-like="like"
              data-article-id="{{ photo.id }}">
              {% if photo in FavoritePictures.objects.all %}
                  удалить из избранных
@@ -23,6 +23,18 @@
              {% endif %}
           </a>
       {% endif %}
+
+
+    {% if request.user == photo.author %}
+    {% if photo.access_token %}
+        <p>Ссылка для доступа: <a href="{% url 'webapp:photo_token_view' photo.access_token %}">{{ request.get_host }}/photo/{{ photo.access_token }}/</a></p>
+    {% else %}
+        <form method="post" action="{% url 'webapp:generate_token' photo.pk %}">
+            {% csrf_token %}
+            <button type="submit">Сгенерировать ссылку</button>
+        </form>
+    {% endif %}
+{% endif %}
 
 
 
