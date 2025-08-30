@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db import models
+from django.urls import reverse
 
 
 class Album(models.Model):
@@ -22,3 +23,6 @@ class Album(models.Model):
         db_table = "albums"
         verbose_name = "Альбом"
         verbose_name_plural = "Альбомы"
+
+    # def get_absolute_url(self):
+    #     return reverse("webapp:album_view", kwargs={"pk": self.pk})

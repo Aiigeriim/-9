@@ -25,9 +25,13 @@
             <ul class="navbar-nav">
 
                 {% block link %}
+
                 {% endblock %}
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url "accounts:users" %}">Пользователи</a>
+                    <a class="nav-link" href="{% url "webapp:photo_list" %}">Фотографии</a>
+                </li>
+            <li class="nav-item">
+                    <a class="nav-link" href="{% url "webapp:album_list" %}">Альбомы</a>
                 </li>
 
                 {% if request.user.is_authenticated %}

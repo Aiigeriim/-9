@@ -6,6 +6,11 @@ class PhotoForm(forms.ModelForm):
         model = Picture
         fields = ["image", "caption", "album", "is_public"]
 
+class AlbumForm(forms.ModelForm):
+    class Meta:
+        model = Album
+        fields = ["title", "description", "is_public"]
+
 
 
 

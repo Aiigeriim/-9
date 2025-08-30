@@ -4,7 +4,7 @@ from django.views.generic import (
 )
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin, PermissionRequiredMixin
 from django.urls import reverse_lazy, reverse
-from .forms import PhotoForm
+from .forms import PhotoForm, AlbumForm
 from .models import Picture, Album
 
 
@@ -61,7 +61,7 @@ class PhotoCreateView(CreateView):
 
     # model = Picture
     # form_class = PhotoForm
-    # template_name = "photos/photo_form.html"
+    # template_name = "photos/photo_create.html"
     #
     # def form_valid(self, form):
     #     form.instance.author = self.request.user
@@ -135,6 +135,7 @@ class PhotoDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 class AlbumListView(ListView):
     model = Album
     template_name = "albums/album_list.html"
+    context_object_name = "albums"
 
 
     context_object_name = "albums"
@@ -144,3 +145,68 @@ class AlbumListView(ListView):
     def get_queryset(self):
         return super().get_queryset()
 
+
+class AlbumDetailView(DetailView):
+    model = Album
+    template_name = "albums/album_detail.html"
+    context_object_name = "album"
+#
+#
+# class AlbumCreateView(CreateView):
+#
+#     form_class = AlbumForm
+#     template_name = "albums/album_create.html"
+#
+#     def form_valid(self, form):
+#         form.instance.author = self.request.user
+#         return super().form_valid(form)
+
+
+
+
+class AlbumCreateView(CreateView):
+    model = Album
+    form_class = AlbumForm
+    template_name = "albums/album_create.html"
+
+    def form_valid(self, form):
+        form.instance.author = self.request.user
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse_lazy("profile", kwargs={"pk": self.request.user.pk})
+
+
+
+
+class AlbumDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    model = Album
+    template_name = "albums/album_delete.html"
+    context_object_name = "album"
+
+    permission_required = 'webapp.delete_album'
+
+    def test_func(self):
+        obj = self.get_object()
+        return self.request.user.has_perm('webapp.delete_album') or obj.author == self.request.user
+
+    def has_permission(self):
+        return self.request.user.has_perm('webapp.delete_album') or self.request.user == self.get_object().author
+
+    def get_success_url(self):
+        return reverse("accounts:profile", kwargs={"pk": self.request.user.pk})
+#
+#
+class AlbumUpdateView(PermissionRequiredMixin, UpdateView):
+    pass
+#     model = Picture
+#     form_class = PhotoForm
+#     template_name = "albums/photo_update.html"
+#     permission_required = 'webapp.change_post'
+#
+#
+#     def has_permission(self):
+#         return super().has_permission() or self.request.user == self.get_object().author
+#
+#     def get_success_url(self):
+#         return reverse_lazy("webapp:photo_view", kwargs={"pk": self.object.pk})

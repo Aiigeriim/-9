@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block link %}
+    {% if request.user == photo.author%}
+        <li class="nav-item">
+            <a href="{% url "webapp:album_update" album %}" class="nav-link">Редактирование</a>
+        </li>
+    {% endif %}
+    {% if request.user == photo.author %}
+        <li class="nav-item">
+        {% url "webapp:photo_delete" photo.pk %}
+            <a href="{% url "webapp:album_delete" album %}" class="nav-link">Удаление</a>
+        </li>
+    {% endif %}
+
+{% endblock %}
+
+{% block content %}
+    {% include "partial/album_view_partial.html" %}
+{% endblock %}
