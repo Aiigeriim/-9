@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Создание{% endblock %}
+<h1>Создание</h1>
+
+{% block content %}
+    {% include "partial/form.html" with button_text="Создать" %}
+{% endblock %}

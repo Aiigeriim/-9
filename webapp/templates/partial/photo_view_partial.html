@@ -1,0 +1,32 @@
+<div class="post bg-white border rounded col-12 col-md-6 mb-4">
+    <div class="post-header py-3 px-4 d-flex align-items-center">
+{#        <img class="post-avatar rounded-circle me-3" src="{{ post.author.avatar.url }}" alt="User Avatar">#}
+{#        <span class="post-username font-weight-bold"><a href="{% url 'accounts:profile' post.author.pk %}">#}
+{#                        {{ post.author.username }}</a>#}
+                    </span>
+    </div>
+{#    <img class="post-image img-fluid" src="{{ post.image.url }}" alt="Post Image">#}
+    <div class="post-actions py-2 px-4">
+
+{#    {% if request.user.is_authenticated %}#}
+{#          <a href="{% url 'webapp:post_like' post.id %}"#}
+{#             data-like="like_post"#}
+{#             data-article-id="{{ post.id }}">#}
+{#             {% if user in post.like_users.all %}#}
+{#                 Unlike#}
+{#             {% else %}#}
+{#                 Like#}
+{#             {% endif %}#}
+{#          </a>#}
+{#          <span id="likes-count-{{ post.id }}">{{ post.like_users.count }}</span>#}
+{#      {% endif %}#}
+
+
+
+    </div>
+    <div class="post-description px-4 py-3">
+        <p>{{ photo.content }}</p>
+    </div>
+    <div class="post-timestamp px-4 py-2 text-muted">{{ photo.created_at }}</div>
+
+</div>
